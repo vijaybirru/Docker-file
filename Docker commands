@@ -1,0 +1,35 @@
+[root@ip-172-31-37-70 ~]# docker container stats  (like top commmand in linux ,shows mem usuage)
+
+df9a4a43c4a4        cocky_chaplygin     0.00%               2.133MiB / 985.8MiB   0.22%               2.01kB / 0B         0B / 0B             0
+CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT     MEM %               NET I/O             BLOCK I/O           PIDS
+df9a4a43c4a4        cocky_chaplygin     0.00%               2.133MiB / 985.8MiB   0.22%               2.01kB / 0B         0B / 0B             0
+
+------------------------------------------------------------------
+[root@ip-172-31-37-70 ~]# docker container top df9a4a43c4a4(container id)-shows which process are running on container
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+root                8785                8760                0                   11:18               pts/0               00:00:00            nginx: master process nginx -g daemon off;
+101                 8847                8785                0                   11:18               pts/0               00:00:00            nginx: worker proces
+---------------------------------------------------------------------------
+Docker port mapping, rename container, restart container, exec container
+
+
+Docker port mapping,
+[root@ip-172-31-37-70 ~]# docker run -itd -p 3600:80 --name testnginx nginx( here 3600 is server port,80 is container port
+that means call is forwarded from server port  to container port)
+6a8ca4a093ae59856f7a1f012492623614242306b5d25ac291b882f9178c164d
+[root@ip-172-31-37-70 ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+6a8ca4a093ae        nginx               "nginx -g 'daemon of…"   45 seconds ago      Up 44 seconds       0.0.0.0:3600->80/tcp   testnginx
+df9a4a43c4a4        nginx               "nginx -g 'daemon of…"   About an hour ago   Up About an hour    80/tcp                 cocky_chaplygin
+
+exec container
+[root@ip-172-31-37-70 ~]# docker exec -it 6a8ca4a093ae /bin/bash
+root@6a8ca4a093ae:/# yum install git
+
+rename container
+[root@ip-172-31-37-70 ~]# docker container rename df9a4a43c4a4 nginx1111 (df9 is container id and nginx111 is new name of container)
+[root@ip-172-31-37-70 ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+6a8ca4a093ae        nginx               "nginx -g 'daemon of…"   8 minutes ago       Up 8 minutes        0.0.0.0:3600->80/tcp   testnginx
+df9a4a43c4a4        nginx               "nginx -g 'daemon of…"   About an hour ago   Up About an hour    80/tcp     
+=======================================================================================================================
