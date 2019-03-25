@@ -1,0 +1,12 @@
+Try enabling the extras repo as docker comes as extras for RHEL:
+
+Below commands should work:
+
+sudo yum install yum-utils
+
+sudo yum-config-manager --enable rhui-REGION-rhel-server-extras
+
+sudo yum install docker -y
+
+service docker start
+
