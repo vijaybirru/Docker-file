@@ -1,0 +1,34 @@
+Dockerfile (Label, Run, Env, Workdir)
+-----------------------------------
+Docker Label
+
+
+LABEL
+Understanding object labels
+
+You can add labels to your image to help organize images by project, record licensing information, to aid in automation, or for other reasons. For each label, add a line beginning with LABEL and with one or more key-value pairs. The following examples show the different acceptable formats. Explanatory comments are included inline.
+
+Strings with spaces must be quoted or the spaces must be escaped. Inner quote characters ("), must also be escaped.
+
+# Set one or more individual labels
+LABEL com.example.version="0.0.1-beta"
+LABEL vendor1="ACME Incorporated"
+LABEL vendor2=ZENITH\ Incorporated
+LABEL com.example.release-date="2015-02-12"
+LABEL com.example.version.is-production=""
+An image can have more than one label. Prior to Docker 1.10, it was recommended to combine all labels into a single LABEL instruction, to prevent extra layers from being created. This is no longer necessary, but combining labels is still supported.
+
+# Set multiple labels on one line
+LABEL com.example.version="0.0.1-beta" com.example.release-date="2015-02-12"
+=================================================
+RUN apt-get update && apt-get install -y \
+
+==================================
+working directory
+
+WORKDIR /tmp/dir1
+RUN touch 123.txt
+
+it means WORKDIR will enter in to that particular folder and executes the commands followed by it
+
+--------------------------------------------------
