@@ -33,3 +33,163 @@ CONTAINER ID        IMAGE               COMMAND                  CREATED        
 6a8ca4a093ae        nginx               "nginx -g 'daemon of…"   8 minutes ago       Up 8 minutes        0.0.0.0:3600->80/tcp   testnginx
 df9a4a43c4a4        nginx               "nginx -g 'daemon of…"   About an hour ago   Up About an hour    80/tcp     
 =======================================================================================================================
+
+Attach to running container, kill, wait, pause, unpause, prune, port
+
+What's the difference between docker stop and docker kill?
+
+Afaik, both will stop a running container. 
+Is it that docker stop attempts to stop the process run inside the container in the correct way, 
+while docker kill will send a kill signal? If so how would docker stop know how to correctly stop the running process. 
+(Since this differs from process to process)
+-------------------
+Removing Volumes
+docker volume rm volume_name volume_name
+-------------------------
+create docker container, diff docker container and copy file into container
+
+docker create -it centos
+it will creates an container from centos image.. if centos image is not there then docker pull centos from hub to local and creates a docker container 
+
+docker container diff containerid
+by this diff command docker will show the different files and folders happened in that container
+
+copy file to container
+
+[root@ip-172-31-37-70 home]# vi 123.txt
+[root@ip-172-31-37-70 home]# pwd
+/home
+[root@ip-172-31-37-70 home]# ls
+1  123.txt  dockerfile  ec2-user
+[root@ip-172-31-37-70 home]# docker container cp 123.txt 59e42e9136ba:/home/
+[root@ip-172-31-37-70 home]# docker container diff 59e42e9136ba
+C /home
+A /home/123.txt
+
+===============================================================
+Export/Import docker container
+
+[root@ip-172-31-37-70 home]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+59e42e9136ba        centos              "/bin/bash"         32 minutes ago      Up 4 minutes                            centos-conatiner
+
+[root@ip-172-31-37-70 home]# docker container export 59e42e9136ba > containerwithgit.tar
+[root@ip-172-31-37-70 home]# ls
+1  123.txt  containerwithgit  containerwithgit.tar  dockerfile  ec2-user
+ 
+ then copy this tar on pendrive give to your friend who needs it and save on his local host where docker is installed and then do import command
+ as below
+ 
+[root@ip-172-31-37-70 home]# docker image import containerwithgit.tar imagegit
+sha256:e140d8067842291317edf34d05b87af7923d9ec4fc23ef00b0ddbb5b364c591d
+[root@ip-172-31-37-70 home]# docker image ls
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+imagegit            latest              e140d8067842        6 seconds ago       315MB
+image1-vij1         latest              df1787e33c97        3 hours ago         285MB
+image1-vijq         latest              df1787e33c97        3 hours ago         285MB
+image1-vij4         latest              fe1ca8cf469b        4 hours ago         202MB
+centos              latest              9f38484d220f        11 days ago         202MB
+
+this is how an EXPORT and IMPORT works like
+exporting an container and works as an image on other host machine
+
+----------------------------------------------------------
+---------------------------------------------------------
+
+how to create docker image from running container (docker commit)
+[root@ip-172-31-37-70 home]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+59e42e9136ba        centos              "/bin/bash"         38 minutes ago      Up 11 minutes                           centos-conatiner
+
+
+here above there is 1 Container we need this container to make an image because i make changes like installing jenkins, maven,tomcat
+so i need same containers like 50 needed,, so i will make this container to image ,, from that image i will make n no of containers
+this is the concept behind it 
+ so command id commit
+ 
+[root@ip-172-31-37-70 home]# docker commit 59e42e9136ba mygitimagefromcontainer
+sha256:3e195dca41d115e7569268c34924a8883dd7c7f5ddfeca7671afe6768868305f
+
+[root@ip-172-31-37-70 home]# docker image ls
+REPOSITORY                TAG                 IMAGE ID            CREATED             SIZE
+mygitimagefromcontainer   latest              3e195dca41d1        6 seconds ago       338MB
+imagegit                  latest              e140d8067842        7 minutes ago       315MB
+image1-vij1               latest              df1787e33c97        3 hours ago         285MB
+image1-vijq               latest              df1787e33c97        3 hours ago         285MB
+image1-vij4               latest              fe1ca8cf469b        4 hours ago         202MB
+centos                    latest              9f38484d220f        11 days ago         202MB
+
+========================================================================================================
+
+
+Docker save/docker load. Diff between export and save & load &import
+
+
+
+[root@ip-172-31-37-70 home]# docker image ls
+REPOSITORY                TAG                 IMAGE ID            CREATED             SIZE
+mygitimagefromcontainer   latest              3e195dca41d1        40 minutes ago      338MB
+imagegit                  latest              e140d8067842        About an hour ago   315MB
+image1-vij1               latest              df1787e33c97        4 hours ago         285MB
+image1-vijq               latest              df1787e33c97        4 hours ago         285MB
+image1-vij4               latest              fe1ca8cf469b        5 hours ago         202MB
+centos                    latest              9f38484d220f        11 days ago         202MB
+ubuntu                    latest              94e814e2efa8        2 weeks ago         88.9MB
+
+
+
+[root@ip-172-31-37-70 home]# docker save 73f4748109f6 > musali.tar
+Error response from daemon: No such image: 73f4748109f6 
+here docker save only for images to save in local repo with .tar extension 
+not for conatiners
+
+
+[root@ip-172-31-37-70 home]# docker save 94e814e2efa8 > musali.tar
+
+i deleted old image ,, now i will create image from .tar file using load command
+
+[root@ip-172-31-37-70 home]# docker load < musali.tar
+762d8e1a6054: Loading layer [==================================================>]  91.39MB/91.39MB
+e45cfbc98a50: Loading layer [==================================================>]  15.87kB/15.87kB
+d60e01b37e74: Loading layer [==================================================>]  12.29kB/12.29kB
+b57c79f4a9f3: Loading layer [==================================================>]  3.072kB/3.072kB
+Loaded image ID: sha256:94e814e2efa8845d95b2112d54497fbad173e45121ce9255b93401392f538499
+[root@ip-172-31-37-70 home]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+59e42e9136ba        centos              "/bin/bash"         About an hour ago   Up About an hour                        centos-conatiner
+[root@ip-172-31-37-70 home]# docker image ls
+REPOSITORY                TAG                 IMAGE ID            CREATED             SIZE
+mygitimagefromcontainer   latest              3e195dca41d1        45 minutes ago      338MB
+imagegit                  latest              e140d8067842        About an hour ago   315MB
+image1-vij1               latest              df1787e33c97        4 hours ago         285MB
+image1-vijq               latest              df1787e33c97        4 hours ago         285MB
+image1-vij4               latest              fe1ca8cf469b        5 hours ago         202MB
+centos                    latest              9f38484d220f        11 days ago         202MB
+<none>                    <none>              94e814e2efa8        2 weeks ago         88.9MB
+
+****
+diff b/w docker save and Export 
+     b/w docker load and Import
+     
+docker save will get all layers as per it but docker Export wont 
+
+
+
+
+How to push image on docker hub, image tag, image pull, docker login
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
