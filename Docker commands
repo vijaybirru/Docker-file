@@ -185,7 +185,13 @@ How to push image on docker hub, image tag, image pull, docker login
 
 
 
-
+------------------------------------
+[root@ip-172-31-25-89 ~]# docker image ls --format '{{.ID}}, {{.Repository}}'
+cd14cecfdb3a, 108w1a0457/jenkins
+cd14cecfdb3a, docker.io/jenkins
+cd14cecfdb3a, jenkins
+cd14cecfdb3a, registry-host:5000/myadmin/rhel-httpd
+-------------------------------------------------------------------------
 
 
 
