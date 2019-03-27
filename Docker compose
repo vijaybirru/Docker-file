@@ -1,0 +1,40 @@
+Docker compose
+While working with docker based microservices its very difficult to manually setup hundreds of microservice, 
+so docker compose is a tool using which we can describe about microservices 
+in YAML file and quickly setup complete environment with a single command
+
+Compose is a tool for defining and running multi-container Docker applications. With Compose, 
+you use a YAML file to configure your application’s services. Then, with a single command, you create and 
+start all the services from your configuration. To learn more about all the features of Compose, see the list of features.
+
+Compose works in all environments: production, staging, development, testing, as well as CI workflows.
+You can learn more about each case in Common Use Cases.
+
+First install docker compose in to docker host machine
+check compose version
+
+docker-compose up
+before that we need YAML fiel to do compose
+
+vi compose.yml
+
+version: '2'
+services:
+  python:
+    image: kammana/python-redis:1.0
+    container_name: python
+    ports:
+     - "8080:5000"
+    networks:
+      - javahome-app
+  redis:
+    container_name: redis
+    image: "redis"
+    networks:
+      - javahome-app
+networks:
+  javahome-app:
+    driver: bridge
+    
+    docker-compose up
+    
