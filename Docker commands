@@ -192,10 +192,167 @@ cd14cecfdb3a, docker.io/jenkins
 cd14cecfdb3a, jenkins
 cd14cecfdb3a, registry-host:5000/myadmin/rhel-httpd
 -------------------------------------------------------------------------
+Docker network Commands:
+  connect     Connect a container to a network
+  create      Create a network
+  disconnect  Disconnect a container from a network
+  inspect     Display detailed information on one or more networks
+  ls          List networks
+  prune       Remove all unused networks
+  rm          Remove one or more networks
 
+ Docker Networking (Null Network, None Network)
+ by default docker had 3 n/w 
+ 
+root@ip-172-31-25-89 ~]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+7a3e3a009fb0        bridge              bridge              local
+732eada04535        host                host                local
+632aaadbdcb9        none                null                local
 
+here null network means 
+i dont want to connect my docker to any ip address , that means null network
+if you enter container and type ifconfig you wont get any ip address
+this is the use of null network
 
+root@ip-172-31-25-89 ~]# docker run -it --network=none centos
 
+if you want to check ip address
+use inspect command 
+[root@ip-172-31-25-89 ~]# docker inspect 3ffcddaad739
+ "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "eb0fc3ad2552140d70cdc6b0dbc197c57cc9dcbc778542d7b208e517921f1d82",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": null,
+            "SandboxKey": "/var/run/docker/netns/eb0fc3ad2552",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "",
+            "Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "MacAddress": "",
+            "Networks": {
+                "none": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "632aaadbdcb9532dae09728557534156fc3a35f30953224ebdac78d7315900d8",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": ""
+
+===========================
+Docker Networking (Connect, Disconnect)
+ 
+ HOw to attach one container to different networks??
+ 1:here conatiner created in bridge network
+ now connecting to vijay network
+ [root@ip-172-31-25-89 ~]# docker network connect vijay 7d05
+
+[root@ip-172-31-25-89 ~]# docker start 7d05
+7d05
+[root@ip-172-31-25-89 ~]# docker attach 7d05
+root@7d05513eef12:/#
+root@7d05513eef12:/# ifconfig(now we can see etho and eth1 are 2 networks connected to one container) by connect command in docker
+eth0      Link encap:Ethernet  HWaddr 02:42:ac:11:00:02
+          inet addr:172.17.0.2  Bcast:0.0.0.0  Mask:255.255.0.0
+          inet6 addr: fe80::42:acff:fe11:2/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:8 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:656 (656.0 B)  TX bytes:656 (656.0 B)
+
+eth1      Link encap:Ethernet  HWaddr 02:42:ac:12:00:02
+          inet addr:172.18.0.2  Bcast:0.0.0.0  Mask:255.255.0.0
+          inet6 addr: fe80::42:acff:fe12:2/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:8 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:656 (656.0 B)  TX bytes:656 (656.0 B)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@7d05513eef12:/# docker network disconnect bridge 7d05
+bash: docker: command not found
+root@7d05513eef12:/# exit
+exit
+[root@ip-172-31-25-89 ~]#  docker network disconnect bridge 7d05 (now disconnecting bridge network out of 2 networks)
+
+[root@ip-172-31-25-89 ~]#
+[root@ip-172-31-25-89 ~]# docker attach 7d05
+You cannot attach to a stopped container, start it first
+[root@ip-172-31-25-89 ~]# docker start 7d05
+7d05
+[root@ip-172-31-25-89 ~]# docker attach 7d05
+root@7d05513eef12:/#
+root@7d05513eef12:/# ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:ac:12:00:02
+          inet addr:172.18.0.2  Bcast:0.0.0.0  Mask:255.255.0.0
+          inet6 addr: fe80::42:acff:fe12:2/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:7 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:586 (586.0 B)  TX bytes:586 (586.0 B)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@7d05513eef12:/# exit
+exit
+
+2:: if container is created in null network , we cannot connect another network to null network as below
+[root@ip-172-31-25-89 ~]# docker run -it --network=none --name=os2 ubuntu:14.04 bash
+[root@ip-172-31-25-89 ~]# docker network connect bridge fac4
+Error response from daemon: Container cannot be connected to multiple networks with one of the networks in private (none) mode
+[root@ip-172-31-25-89 ~]# docker network connect vijay fac4
+Error response from daemon: Container cannot be connected to multiple networks with one of the networks in private (none) mode
+
+3:if container created in host network.. if you want to connect to another network its not possible to connect
+root@ip-172-31-25-89 ~]# docker run -it --network=host --name=os3 ubuntu:14.04 bash
+[root@ip-172-31-25-89 ~]# docker network connect bridge 427e
+Error response from daemon: Container sharing network namespace with another container or host cannot be connected to any other network
+[root@ip-172-31-25-89 ~]# docker network connect vijay 427e
+Error response from daemon: Container sharing network namespace with another container or host cannot be connected to any other network
+===========================================================================================================
+Docker Networking (Remove, Proun)
+Commands:
+  connect     Connect a container to a network
+  create      Create a network
+  disconnect  Disconnect a container from a network
+  inspect     Display detailed information on one or more networks
+  ls          List networks
+  prune       Remove all unused networks
+  rm          Remove one or more networks
+======================================================================
+Docker (in Hindi) : Docker Registry/Repository (Insecure)
 
 
 
