@@ -1,0 +1,147 @@
+Docker Networking ( Bridge Network Overview )
+
+Docker network ls
+
+[root@ip-172-31-25-89 ~]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+7a3e3a009fb0        bridge              bridge              local
+732eada04535        host                host                local
+632aaadbdcb9        none                null                local
+
+Default is bridge n/w
+
+then
+[root@ip-172-31-25-89 ~]# docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED                                                                                                                                  STATUS              PORTS               NAMES
+
+[root@ip-172-31-25-89 ~]# docker run -itd nginx
+Unable to find image 'nginx:latest' locally
+Trying to pull repository registry.access.redhat.com/nginx ...
+Trying to pull repository docker.io/library/nginx ...
+latest: Pulling from docker.io/library/nginx
+Digest: sha256:dff6326b09c76bef1425ee64c2e218b38737cdb5412b8ccf84ca70740bfa1db2
+Status: Image is up to date for docker.io/nginx:latest
+
+c642ea1197692276b290a72e9506ca101c2b4f2f42e91f587b93a09ff8cf1506 (container is created ,,, c64 )
+now by default the container is under bridge network 
+you can see below in container folder as "Containers": {
+            "c642ea1197692276b290a72e9506ca101c2b4f2f42e91f587b93a09ff8cf1506":  
+
+
+[root@ip-172-31-25-89 ~]# docker network inspect bridge
+[
+    {
+        "Name": "bridge",
+        "Id": "7a3e3a009fb0bde85f3995878fabb71d0ae9195627756156d29cb6bd415b73d2"                                                                                                                     ,
+        "Created": "2019-03-27T04:29:16.810487497Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.17.0.0/16"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Containers": {
+            "c642ea1197692276b290a72e9506ca101c2b4f2f42e91f587b93a09ff8cf1506":                                                                                                                      {
+                "Name": "elated_yalow",
+                "EndpointID": "ee5aa629189f2c55431cc1f40336bb70841508b9f08cd9d44                                                                                                                     f3e99262947fc30",
+                "MacAddress": "02:42:ac:11:00:02",
+                "IPv4Address": "172.17.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.bridge.default_bridge": "true",
+            "com.docker.network.bridge.enable_icc": "true",
+            "com.docker.network.bridge.enable_ip_masquerade": "true",
+            "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+            "com.docker.network.bridge.name": "docker0",
+            "com.docker.network.driver.mtu": "1500"
+        },
+        "Labels": {}
+    }
+]
+
+-------------------
+
+Create a new network
+
+[root@ip-172-31-25-89 ~]# docker network create  vijay
+90c3547b704056b088c04707ce28d7cfa4504c048d0a1d8cf69fdd638a515fda
+[root@ip-172-31-25-89 ~]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+7a3e3a009fb0        bridge              bridge              local
+732eada04535        host                host                local
+632aaadbdcb9        none                null                local
+90c3547b7040        vijay               bridge              local
+
+
+now creating a new container in new network
+
+[root@ip-172-31-25-89 ~]# docker run -itd --network vijay htppd
+Unable to find image 'htppd:latest' locally
+Trying to pull repository registry.access.redhat.com/htppd ...
+^Z
+[2]+  Stopped                 docker run -itd --network vijay htppd
+[root@ip-172-31-25-89 ~]# docker run -itd --network vijay httpd
+Unable to find image 'httpd:latest' locally
+Trying to pull repository registry.access.redhat.com/httpd ...
+Trying to pull repository docker.io/library/httpd ...
+latest: Pulling from docker.io/library/httpd
+27833a3ba0a5: Already exists
+7df2f4a2bf95: Pull complete
+bbda6f884d14: Pull complete
+eb331aac1c31: Pull complete
+ef7c5393eddd: Pull complete
+Digest: sha256:a7810e999e74d7e2a350ceabb11874cb4a2fbbd0e53b90dcdee40bc7532e2a06
+Status: Downloaded newer image for docker.io/httpd:latest
+c5bbea472319fb0f6b92c84c0226531644c126a149dbdb03bbfabaae6dc18456
+
+[root@ip-172-31-25-89 ~]# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS              PORTS               NAMES
+c5bbea472319        httpd               "httpd-foreground"       About a minute ago   Up About a minute   80/tcp              objective_kare
+c642ea119769        nginx               "nginx -g 'daemon ..."   22 minutes ago       Up 22 minutes       80/tcp              elated_yalow
+
+now checking whether container is created in new network as below
+[root@ip-172-31-25-89 ~]# docker inspect vijay
+[
+    {
+        "Name": "vijay",
+        "Id": "90c3547b704056b088c04707ce28d7cfa4504c048d0a1d8cf69fdd638a515fda",
+        "Created": "2019-03-27T05:54:15.760496257Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Containers": {
+            "c5bbea472319fb0f6b92c84c0226531644c126a149dbdb03bbfabaae6dc18456": {
+                "Name": "objective_kare",
+                "EndpointID": "f946080113ea250e4dd0ef4630c75844f64ecd2720ca411d89664cfdeae4a6d1",
+                "MacAddress": "02:42:ac:12:00:02",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+]
+
